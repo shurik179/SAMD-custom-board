@@ -1,0 +1,38 @@
+{
+  "packages":
+  [
+    {
+      "name": "$vendor_name",
+      "maintainer": "$vendor_name_long",
+      "websiteURL": "$info_url",
+      "help": {
+        "online": "$help_url"
+      },
+      "email" : "$vendor_email",
+      "platforms":
+      [
+        {
+          "name": "$package_name",
+          "architecture": "samd",
+          "version": "$package_version",
+          "category": "Contributed",
+          "url": "REPLACE_BY_ACTUAL_URL",
+          "archiveFileName": "$archive_filename",
+          "checksum": "SHA-256:$archive_checksum",
+          "size": "$archive_size",
+          "boards": [
+            {
+              "name": "$board_name_long"
+            }
+          ],
+          "toolsDependencies":
+          [
+          ]
+        }
+      ],
+      "tools":
+      [
+      ]
+    }
+  ]
+}
