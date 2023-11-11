@@ -38,3 +38,7 @@ build*
 # private 
 
 private*
+
+# MacOS
+
+.DS_store
