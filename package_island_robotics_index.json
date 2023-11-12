@@ -16,10 +16,10 @@
           "architecture": "samd",
           "version": "1.0.2",
           "category": "Contributed",
-          "url": "https://github.com/shurik179/SAMD-custom-board/raw/main/myboard_m0-1.0.2.zip",
+          "url": "REPLACE_BY_ACTUAL_URL",
           "archiveFileName": "myboard_m0-1.0.2.zip",
-          "checksum": "SHA-256:a794be7a60a5dcd4845913d5845556fc854843e634fd9cad09eb87041e0036c9",
-          "size": "115272",
+          "checksum": "SHA-256:8ddc8e83ea2618276e335a0415549ed80ab60b2fc3d049f252361d6e3d799e11",
+          "size": "115744",
           "boards": [
             {
               "name": "My Board (M0)"

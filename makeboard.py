@@ -41,7 +41,10 @@ board.write_boards_txt()
 
 
 #compressing directory into zip archive 
-zip_archive = shutil.make_archive(f"build/{board.name}-{board.version}", 'zip', board.package_directory)
+zip_archive = shutil.make_archive(f"build/{board.name}-{board.version}", 
+                                  'zip', 
+                                  root_dir = 'build',
+                                  base_dir=board.version)
 archive_size = os.path.getsize(zip_archive)
 # compute hash:
 with open(zip_archive, "rb") as f:
