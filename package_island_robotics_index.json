@@ -16,7 +16,7 @@
           "architecture": "samd",
           "version": "1.0.2",
           "category": "Contributed",
-          "url": "REPLACE_BY_ACTUAL_URL",
+          "url": "Rhttps://github.com/shurik179/SAMD-custom-board/raw/main/myboard_m0-1.0.2.zip",
           "archiveFileName": "myboard_m0-1.0.2.zip",
           "checksum": "SHA-256:8ddc8e83ea2618276e335a0415549ed80ab60b2fc3d049f252361d6e3d799e11",
           "size": "115744",
