@@ -1,0 +1,38 @@
+{
+  "packages":
+  [
+    {
+      "name": "island_robotics",
+      "maintainer": "Island Robotics LLC",
+      "websiteURL": "https://github.com/shurik179",
+      "help": {
+        "online": "https://github.com/shurik179"
+      },
+      "email" : "irobotics.store@gmail.com",
+      "platforms":
+      [
+        {
+          "name": "Island Robotics SAMD boards",
+          "architecture": "samd",
+          "version": "1.0.2",
+          "category": "Contributed",
+          "url": "REPLACE_BY_ACTUAL_URL",
+          "archiveFileName": "myboard_m0-1.0.2.zip",
+          "checksum": "SHA-256:a794be7a60a5dcd4845913d5845556fc854843e634fd9cad09eb87041e0036c9",
+          "size": "115272",
+          "boards": [
+            {
+              "name": "My Board (M0)"
+            }
+          ],
+          "toolsDependencies":
+          [
+          ]
+        }
+      ],
+      "tools":
+      [
+      ]
+    }
+  ]
+}
