@@ -229,7 +229,7 @@ class SAMDconfig:
         
         # copy built bootloader
         os.chdir("../..")
-        bootloader_dir = f"build/uf2-samd21/build/{self.name}"
+        bootloader_dir = f"{self.build_directory}/uf2-samd21/build/{self.name}"
         bootloader_basename = f"bootloader-{self.name}-{self.version}"
         return(bootloader_dir,bootloader_basename)
     

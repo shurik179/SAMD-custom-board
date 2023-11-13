@@ -31,6 +31,8 @@ bootloader_dest = f"{board.package_directory}/bootloaders/{board.name}"
 os.mkdir(bootloader_dest)
 shutil.copy(f"{bootloader_dir}/{bootloader_basename}.bin", bootloader_dest)
 shutil.copy(f"{bootloader_dir}/{bootloader_basename}.elf", bootloader_dest)
+#also, copy to the top of build directory
+shutil.copy(f"{bootloader_dir}/{bootloader_basename}.bin", board.build_directory)
 
 # add bootloader filename to dictionary
 board.d['bootloader_filename']=f"{bootloader_basename}.bin"
@@ -41,21 +43,7 @@ board.write_boards_txt()
 
 
 #compressing directory into zip archive 
-zip_archive = shutil.make_archive(f"build/{board.name}-{board.version}", 
-                                  'zip', 
-                                  root_dir = 'build',
-                                  base_dir=board.version)
-archive_size = os.path.getsize(zip_archive)
-# compute hash:
-with open(zip_archive, "rb") as f:
-    bytes = f.read() # read entire file as bytes
-    hash = hashlib.sha256(bytes).hexdigest()
-    
-print(f"Created package archive, size {archive_size} bytes,\n SHA256 hash: {hash}")
-# add the info to dictionary
-board.d['archive_filename']=f"{board.name}-{board.version}.zip"
-board.d['archive_size']= archive_size
-board.d['archive_checksum']=hash 
+board.package_archive()
 
 # create json file 
 print("Creating json index file")
