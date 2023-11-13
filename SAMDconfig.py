@@ -11,25 +11,33 @@ import subprocess
 import glob 
 from string import Template
 import hashlib
+import json 
+from datetime import date 
 
 class SAMDconfig:
     # constructor
     def __init__(self, filename):
         # dictionary containign all config data 
         self.d = {}
-        # read all values from config file 
+        self.d['build_date'] = date.today().isoformat()
+        # read all values from main sections of config file 
         config_file = configparser.ConfigParser()
-        config_file.read(filename)
-        for s in config_file.sections():
+        config_file.read(filename)    
+        for s in ['hardware', 'usb','names', 'paths']:
             for key, value in config_file[s].items():
                 self.d[key]=value
 
+        # now, read additional options
+        self.extras = {}
+        for s in ['m4_usart_options', 'bootloader_extras']:
+            for key, value in config_file[s].items():
+                self.extras[key]=value
+
+
         #check for empty values
-        for key, value in self.d.items():
-            if (not value):
-                print(f'No value provided for {key}')
-                raise RuntimeError('Missing configuration parameters')
-            
+        self.check_missing_values(self.d)
+        self.check_missing_values(self.extras)
+
         #define common properties 
         self.name = self.d['board_name']
         self.version = self.d['package_version']
@@ -38,7 +46,7 @@ class SAMDconfig:
         self.is_samd51 = (self.d['chip_family'] == 'SAMD51') or (self.d['chip_family'] == 'SAME51')
 
         # add MCU-specific parameters
-        if self.d['chip_family'] == 'SAMD21':
+        if self.chip_family == 'SAMD21':
             self.d['flash_size'] = 262144
             self.d['data_size'] =  0
             self.d['offset'] = '0x2000'
@@ -61,12 +69,17 @@ class SAMDconfig:
         if self.chip_variant == 'SAMD51P20A' or self.chip_variant == 'SAMD51J20A':
             self.d['flash_size'] = 1032192
 
-        # add extra flags
+        # add extra GCC  flags
         self.d['extra_flags'] += f' -D__{self.chip_variant}__'
         if self.d['crystalless']:
             self.d['extra_flags'] += ' -DCRYSTALLESS'
 
-
+    def check_missing_values(self, dictionary):
+        for key, value in dictionary.items():
+            if (not value):
+                print(f'No value provided for {key}')
+                raise RuntimeError('Missing configuration parameters')
+            
     # reads template file, does all substitutions from the dictionary, saves result as destination
     # source and destination shoudl be filenames 
     def process_file(self, source, destination):
@@ -108,7 +121,7 @@ class SAMDconfig:
         shutil.copy2('board_data/variant.cpp', board_variant)
         shutil.copy2('board_data/variant.h', board_variant)
 
-    # creates boards.txt file in given directory, by processing boards_TEMPLATE.txt in that directory 
+    # creates boards.txt, platform.txt and README.md files, by processing boards_TEMPLATE.txt in package directory 
     def write_boards_txt(self):
         # if necessary, add entries for cache and speed menus 
         self.d['menu_cache']=''
@@ -134,6 +147,12 @@ class SAMDconfig:
         # substitute all values in the template board.txt file
         self.process_file(f"{self.package_directory}/boards_TEMPLATE.txt", f"{self.package_directory}/boards.txt")
         os.remove(f"{self.package_directory}/boards_TEMPLATE.txt")       
+        # substitute all values in the template platfotm.txt file
+        self.process_file(f"{self.package_directory}/platform_TEMPLATE.txt", f"{self.package_directory}/platform.txt")
+        os.remove(f"{self.package_directory}/platform_TEMPLATE.txt")
+        self.process_file(f"{self.package_directory}/README_TEMPLATE.md", f"{self.package_directory}/README.md")
+        os.remove(f"{self.package_directory}/README_TEMPLATE.md")
+       
 
     # creates board.mk file in given directory
     def write_board_mk(self, dest_directory):
@@ -158,17 +177,18 @@ class SAMDconfig:
                 board_config.write('#define CRYSTALLESS      1\n\n')
             if 'led_pin' in self.d:
                 board_config.write('#define LED_PIN          '+self.d['led_pin']+'\n\n')
-            if 'neopixel_pin' in self.d:
-                board_config.write('#define BOARD_NEOPIXEL_PIN   '+self.d['neopixel_pin']+'\n')
-                board_config.write('#define BOARD_NEOPIXEL_COUNT 1\n\n')
-            if self.is_samd51:
-                usart_options = ['BOOT_USART_MODULE','BOOT_USART_MASK', 'BOOT_USART_BUS_CLOCK_INDEX',
-                                'BOOT_USART_PAD_SETTINGS', 'BOOT_USART_PAD3', 'BOOT_USART_PAD2', 'BOOT_USART_PAD1',
-                                'BOOT_USART_PAD0', 'BOOT_GCLK_ID_CORE', 'BOOT_GCLK_ID_SLOW']
-                for key in usart_options:
-                    value = self.d[key.lower()]
-                    padded_key=key.ljust(27)
-                    board_config.write(f'#define {padded_key} {value}\n')
+            if 'board_neopixel_pin' in self.d:
+                board_config.write('#define BOARD_NEOPIXEL_PIN   '+self.d['board_neopixel_pin']+'\n')
+                board_config.write('#define BOARD_NEOPIXEL_COUNT   '+self.d['board_neopixel_count']+'\n\n')
+            if 'board_rgbled_clock_pin' in self.d:
+                board_config.write('#define BOARD_RGBLED_CLOCK_PIN   '+self.d['board_rgbled_clock_pin']+'\n')
+                board_config.write('#define BOARD_RGBLED_DATA_PIN   '+self.d['board_rgbled_data_pin']+'\n\n')
+
+            # now, add extras 
+
+            for key, value in self.extras.items():
+                padded_key=key.ljust(27).upper()
+                board_config.write(f'#define {padded_key} {value}\n')
             board_config.write("#endif\n")
 
     # gets all necessary paths for GCC and make and adds them to PATH
@@ -212,4 +232,68 @@ class SAMDconfig:
         bootloader_dir = f"build/uf2-samd21/build/{self.name}"
         bootloader_basename = f"bootloader-{self.name}-{self.version}"
         return(bootloader_dir,bootloader_basename)
+    
+    # compress already constructed package directory into a zip archive and 
+    # record archive size and SHA256 checksum
+    def package_archive(self):
+        zip_archive = shutil.make_archive(f"{self.build_directory}/{self.name}-{self.version}", 
+                                  'zip', 
+                                  root_dir = self.build_directory,
+                                  base_dir=self.version)
+        archive_size = os.path.getsize(zip_archive)
+        # compute hash:
+        with open(zip_archive, "rb") as f:
+            bytes = f.read() # read entire file as bytes
+            hash = hashlib.sha256(bytes).hexdigest()
+    
+        print(f"Created package archive, size {archive_size} bytes,\n SHA256 hash: {hash}")
+        # add the info to dictionary
+        self.d['archive_filename']=f"{self.name}-{self.version}.zip"
+        self.d['archive_size']= archive_size
+        self.d['archive_checksum']=hash 
+
+    # write json index file 
+    def write_index_json(self):
+        # see structure specifications here: https://arduino.github.io/arduino-cli/0.35/package_index_json-specification/
+        # let's create the current version of samd platform
+        samd_current={
+            "name": self.d["package_name"],
+            "architecture": "samd",
+            "version": self.d["package_version"],
+            "category": "Contributed",
+            "url": "REPLACE_BY_ACTUAL_URL",
+            "archiveFileName": self.d["archive_filename"],
+            "checksum": "SHA-256:"+self.d["archive_checksum"],
+            "size": self.d["archive_size"],
+            "boards": [
+                {
+                    "name": self.d["board_name_long"]
+                }
+            ],
+            "toolsDependencies":
+            [
+            ]
+        }
+
+        # create the package structure
+        package = {
+            "name": self.d["vendor_name"],
+            "maintainer": self.d["vendor_name_long"],
+            "websiteURL": self.d["info_url"],
+            "help": {
+                "online": self.d["help_url"]
+            },
+            "email" : self.d["vendor_email"],
+            "platforms":[samd_current],
+            "tools":[]
+        }
+        # FIXME: deal wiht previous versions
+        packages = {"packages": [package]}
+        # now save to json 
+        indexfile_name = self.build_directory+"/package_"+self.d['vendor_name']+"_index.json"
+        with open(indexfile_name, 'w', encoding = 'UTF-8') as indexfile:
+            json.dump(packages,indexfile, indent = 2)
+
+
+
     

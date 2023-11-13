@@ -59,5 +59,4 @@ board.d['archive_checksum']=hash
 
 # create json file 
 print("Creating json index file")
-indexfile_name = "build/package_"+board.d['vendor_name']+"_index.json"
-board.process_file('package_TEMPLATE_index.json', indexfile_name)
+board.write_index_json()

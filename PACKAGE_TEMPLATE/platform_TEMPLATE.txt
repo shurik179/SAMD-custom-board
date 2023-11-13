@@ -1,0 +1,5 @@
+# Since we refer to adafruit:arduino core, we also inherit all settings of platform.txt 
+# from Adafruit's package. Thus, we only need to provide the bare minimum here 
+
+name = $package_name
+version=$package_version 
