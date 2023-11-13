@@ -2,9 +2,6 @@
 import SAMDconfig
 import os
 import shutil
-import hashlib 
-
-
 
 # Read all board configuration data 
 print("Reading board config...")
@@ -36,10 +33,9 @@ shutil.copy(f"{bootloader_dir}/{bootloader_basename}.bin", board.build_directory
 # add bootloader filename to dictionary
 board.d['bootloader_filename']=f"{bootloader_basename}.bin"
 
-# create boards.txt
+# create boards.txt, platform.txt, README.md
 print("Writing boards.txt file")
 board.write_boards_txt()
-
 
 #compressing directory into zip archive 
 board.package_archive()
