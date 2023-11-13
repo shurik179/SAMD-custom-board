@@ -26,7 +26,6 @@ Currently, the following variants are supported:
 * SAMD51/SAME51: SAMD51G19A, SAMD51J19A, SAMD51J20A,SAMD51P20A, SAME51J19A
 * Untested: SAME54N20A, SAME54P20A
 
-Deatailed instructions will be posted soon 
-
+Deatailed instructions are posted in hackaday: https://hackaday.io/project/193590-arduino-support-for-custom-samd-board
 
  

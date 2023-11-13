@@ -121,7 +121,7 @@ class SAMDconfig:
         shutil.copy2('board_data/variant.cpp', board_variant)
         shutil.copy2('board_data/variant.h', board_variant)
 
-    # creates boards.txt, platform.txt and README.md files, by processing boards_TEMPLATE.txt in package directory 
+    # creates boards.txt, platform.txt and README.md files, by processing template files in package directory 
     def write_boards_txt(self):
         # if necessary, add entries for cache and speed menus 
         self.d['menu_cache']=''
@@ -153,7 +153,6 @@ class SAMDconfig:
         self.process_file(f"{self.package_directory}/README_TEMPLATE.md", f"{self.package_directory}/README.md")
         os.remove(f"{self.package_directory}/README_TEMPLATE.md")
        
-
     # creates board.mk file in given directory
     def write_board_mk(self, dest_directory):
         with open(f"{dest_directory}/board.mk", 'w', encoding = 'UTF-8') as board_mk:
@@ -261,7 +260,7 @@ class SAMDconfig:
             "architecture": "samd",
             "version": self.d["package_version"],
             "category": "Contributed",
-            "url": "REPLACE_BY_ACTUAL_URL",
+            "url": "FIXME",
             "archiveFileName": self.d["archive_filename"],
             "checksum": "SHA-256:"+self.d["archive_checksum"],
             "size": self.d["archive_size"],

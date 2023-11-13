@@ -16,7 +16,7 @@ board.setup_build_directory('build')
 
 # write config files for bootloader 
 print("Creating config files for the board bootloader")
-bootloader_config_dir = f"build/uf2-samd21/boards/{board.name}"
+bootloader_config_dir = f"{board.build_directory}/uf2-samd21/boards/{board.name}"
 os.mkdir(bootloader_config_dir)
 board.write_board_mk(bootloader_config_dir)
 board.write_board_config(bootloader_config_dir)
@@ -24,7 +24,6 @@ board.write_board_config(bootloader_config_dir)
 # build bootloader 
 print("Building bootloader...")
 bootloader_dir, bootloader_basename = board.build_bootloader()
-print("Bootloader uccessfully built")
 
 # copy built bootloader into the package 
 bootloader_dest = f"{board.package_directory}/bootloaders/{board.name}"
